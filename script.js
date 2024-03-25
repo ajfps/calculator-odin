@@ -6,78 +6,102 @@ document.addEventListener("DOMContentLoaded", () => {
   const numberButtons = document.querySelectorAll(".numbers");
   const operatorButtons = document.querySelectorAll(".operators");
 
-  let firstNumber;
-  let operator;
+  const dotButton = document.querySelector(".dot");
 
-  operatorButtons.forEach((button) => {
+  const clear = document.querySelector(".clear");
+  const equals = document.querySelector(".equals");
+
+  let firstNumber = null;
+  let result = null;
+  let operator = null;
+  let secondNumber = null;
+
+  let isEvaluated = false; 
+
+  numberButtons.forEach((button) => {
     button.addEventListener("click", () => {
-      if (button.textContent === "+") {
-        if (text.textContent) {
-          if (!operator) {
-            firstNumber = parseInt(text.textContent);
-            subtext.textContent = firstNumber;
-            text.textContent = "";
-            operator = "+";
-          } else {
-            secondNumber = parseInt(text.textContent);
-            firstNumber += secondNumber;
-            subtext.textContent = firstNumber;
-            text.textContent = "";
-          }
+      const buttonText = button.textContent;
+
+      if (isEvaluated) {
+        text.textContent = "";
+        subtext.textContent = "";
+        firstNumber = null;
+        result = null;
+        operator = null;
+        secondNumber = null;
+        isEvaluated = false;
+      }
+
+      if (text.textContent.length < 6) {
+        if (!operator) {
+          text.textContent += buttonText;
+          firstNumber = parseFloat(text.textContent);
+        } else {
+          text.textContent += buttonText;
+          secondNumber = parseFloat(text.textContent.slice(1));
+          result = calculateResults(firstNumber, secondNumber, operator);
+          subtext.textContent = result;
         }
-      } else if (button.textContent === "-") {
-        if (text.textContent) {
-          if (!operator) {
-            firstNumber = parseInt(text.textContent);
-            subtext.textContent = firstNumber;
-            text.textContent = "";
-            operator = "-";
-          } else {
-            secondNumber = parseInt(text.textContent);
-            firstNumber -= secondNumber;
-            subtext.textContent = firstNumber;
-            text.textContent = "";
-          }
-        }
-      } else if (button.textContent === "×") {
-        if (text.textContent) {
-          if (!operator) {
-            firstNumber = parseInt(text.textContent);
-            subtext.textContent = firstNumber;
-            text.textContent = "";
-            operator = "*";
-          } else {
-            secondNumber = parseInt(text.textContent);
-            firstNumber *= secondNumber;
-            subtext.textContent = firstNumber;
-            text.textContent = "";
-          }
-        }
-      } else {
-        if (text.textContent) {
-            if (!operator) {
-              firstNumber = parseInt(text.textContent);
-              subtext.textContent = firstNumber;
-              text.textContent = "";
-              operator = "/";
-            } else {
-              secondNumber = parseInt(text.textContent);
-              firstNumber /= secondNumber;
-              subtext.textContent = firstNumber;
-              text.textContent = "";
-            }
-          }
       }
     });
   });
 
-  numberButtons.forEach((button) => {
-    button.addEventListener("click", () => {
-      buttonText = button.textContent;
+  dotButton.addEventListener("click", () => {
+    const buttonText = dotButton.textContent;
 
-      if (text.textContent.length < 6) {
-        text.textContent += buttonText;
+    if (!text.textContent.includes(".")) {
+      text.textContent += buttonText;
+    }
+  });
+
+  operatorButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      const newOperator = button.textContent;
+
+      if (operator !== null && isEvaluated) {
+        firstNumber = result;
+        isEvaluated = false;
       }
+
+      operator = newOperator;
+      subtext.textContent = firstNumber;
+      text.textContent = operator;
     });
+  });
+
+  function calculateResults(firstNum, secondNum, operator) {
+    let calculatedResult;
+
+    if (operator === "+") {
+      calculatedResult = firstNum + secondNum;
+    } else if (operator === "-") {
+      calculatedResult = firstNum - secondNum;
+    } else if (operator === "×") {
+      calculatedResult = firstNum * secondNum;
+    } else if (operator === "/") {
+      calculatedResult = firstNum / secondNum;
+    }
+    result = calculatedResult;
+    return calculatedResult;
+  }
+
+  clear.addEventListener("click", () => {
+    text.textContent = "";
+    subtext.textContent = "";
+    result = 0;
+    firstNumber = 0;
+    secondNumber = 0;
+    operator = null;
+    isEvaluated = false; 
+  });
+
+  equals.addEventListener("click", () => {
+    if (firstNumber !== null && operator !== null && secondNumber !== null) {
+      result = calculateResults(firstNumber, secondNumber, operator);
+      text.textContent = Math.round(result * 100) / 100;
+      subtext.textContent = "";
+
+      isEvaluated = true;
+    }
   });
 });
